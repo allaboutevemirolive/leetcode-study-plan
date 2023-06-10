@@ -37,11 +37,11 @@ const fs = require('fs');
         // await solutionButton.click();
 
 
-        // // Extract the text content from the specified HTML element
-        // const textContent = await newPage.$eval(
-        //     '.mr-2.text-label-1.dark\\:text-dark-label-1.text-lg.font-medium',
-        //     (element) => element.textContent
-        // );
+        // Extract the text content from the specified HTML element
+        const textContent = await newPage.$eval(
+            '.mr-2.text-label-1.dark\\:text-dark-label-1.text-lg.font-medium',
+            (element) => element.textContent
+        );
 
         console.log(textContent);
 
