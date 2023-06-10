@@ -1,0 +1,11 @@
+{
+  "name": "leetcode-study-plan",
+  "version": "1.0.0",
+  "description": "Generate nodejs code with playwright that do the following task :",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "allaboutevemirolive",
+  "license": "ISC"
+}
