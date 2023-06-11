@@ -12,17 +12,20 @@ async function languageFiller(page, search_lang) {
 async function sortButtonClicker(page) {
     const button_sort = await page.$('#headlessui-menu-button-\\:Rmaa9j9l5t6\\:');
     await button_sort.click();
+    await page.waitForTimeout( 3 * 1000 );
 }
 
 async function listOption(page) {
     const button_option = await page.$('button[id="headlessui-menu-button-:Rb5ai9j9d5t6:"]');
     await button_option.click();
+    await page.waitForTimeout( 3 * 1000 );
 }
 
 
 async function recentButtonClicker(page) {
     const button_recent = await page.$('div.truncate:has-text("Most Recent")');
     await button_recent.click();
+    await page.waitForTimeout( 3 * 1000 );
 }
 
 
@@ -96,8 +99,6 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 }
 
 
-
-
 (async () => {
     const browser = await chromium.launch({ headless: false });
     const context = await browser.newContext();
@@ -105,9 +106,7 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 
 
     const search_lang = "rust";
-
     const unhide_Lang_Button = 'Rust';
-
     const target_language_class = '.language-rust, .language-python, .language-java, .language-cpp';
 
 
@@ -140,25 +139,7 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 
             for (const element of fileElements) {
 
-
-
-
-
-                // const fileName = await element.textContent();
-
-                // // Update file path
-                // const filePath = `${folderPath}/${fileName}`;
-
-                // fs.mkdirSync(filePath, { recursive: true });
-
-                // console.log(`Created file: ${filePath}`);
-
-
-
-
-
                 // code
-
                 await element.click();
 
                 await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
@@ -169,19 +150,14 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 
 
 
-
-
                 // Extract main title
                 const textContent = await newPage.$eval(
                     '.mr-2.text-label-1.dark\\:text-dark-label-1.text-lg.font-medium',
                     (element) => element.textContent
                 );
-
                 console.log(textContent);
 
                 const folder_dash = `${textContent}`;
-
-                // const fileName = await element.textContent();
 
                 // Update file path
                 const filePath = `${folderPath}/${textContent}`;
@@ -189,11 +165,6 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
                 fs.mkdirSync(filePath, { recursive: true });
 
                 console.log(`Created file: ${filePath}`);
-
-
-
-
-
 
 
 
