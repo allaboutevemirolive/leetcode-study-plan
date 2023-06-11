@@ -81,15 +81,10 @@ async function copySolutionToClipboard(page, target_language_class) {
 
 
 async function writeToFile(folder_dash, link, copied_solution, file_txt_underscore, filePath) {
-    // const folderPath = `${__dirname}/${folder_dash}`;
-    // const filePath = `${folderPath}/${file_txt_underscore}.rs`;
 
-    // const folderPath = `${__dirname}/${folderPath}/${folder_dash}`;
     const filePath2 = `${filePath}/${file_txt_underscore}.rs`;
 
     try {
-        // Create the folder if it doesn't exist
-        // fs.mkdirSync(filePath2, { recursive: true });
 
         // Write to the file
         fs.writeFileSync(filePath2, `// ${link}\n${copied_solution}`);
@@ -121,15 +116,18 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 
     await page.waitForSelector('div.w-full.overflow-hidden.css-yw0m6t');
 
-    // await detectFoldersAndCreateFiles(page);
-
     const folderElements = await page.$$('div.w-full.overflow-hidden.css-yw0m6t');
 
     for (const folderElement of folderElements) {
 
         const folderNameElement = await folderElement.$('div[style="font-size: 12px; font-weight: 500;"]');
 
-        const folderName = await folderNameElement.textContent();
+        const folderNameUnclean = await folderNameElement.textContent();
+
+        // List of invalid symbols for Windows folder names
+        const invalidSymbols = /[<>:"\/\\|?*\x00-\x1F]/g;
+        const folderName = folderNameUnclean.replace(invalidSymbols, "_");
+
         const folderPath = `${__dirname}/${folderName}`;
 
         try {
@@ -141,15 +139,22 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
             const fileElements = await folderElement.$$('div[style="font-weight: 500; font-size: 14px;"]');
 
             for (const element of fileElements) {
-                const fileName = await element.textContent();
 
-                // Update file path
-                const filePath = `${folderPath}/${fileName}`;
 
-                // fs.writeFileSync(filePath, '');
-                fs.mkdirSync(filePath, { recursive: true });
 
-                console.log(`Created file: ${filePath}`);
+
+
+                // const fileName = await element.textContent();
+
+                // // Update file path
+                // const filePath = `${folderPath}/${fileName}`;
+
+                // fs.mkdirSync(filePath, { recursive: true });
+
+                // console.log(`Created file: ${filePath}`);
+
+
+
 
 
                 // code
@@ -162,6 +167,10 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 
                 const newPage = allPages[allPages.length - 1];
 
+
+
+
+
                 // Extract main title
                 const textContent = await newPage.$eval(
                     '.mr-2.text-label-1.dark\\:text-dark-label-1.text-lg.font-medium',
@@ -170,6 +179,25 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 
                 console.log(textContent);
 
+                const folder_dash = `${textContent}`;
+
+                // const fileName = await element.textContent();
+
+                // Update file path
+                const filePath = `${folderPath}/${textContent}`;
+
+                fs.mkdirSync(filePath, { recursive: true });
+
+                console.log(`Created file: ${filePath}`);
+
+
+
+
+
+
+
+
+
                 await newPage.waitForLoadState('networkidle');
 
                 const solutionElement = await newPage.waitForSelector('span:has-text("Solutions")');
@@ -177,9 +205,7 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
                 await solutionElement.click();
 
 
-                const folder_dash = `${textContent}`;
-
-                // const folder_dash = `${folderPath}/${folder_name}`;
+                
 
                 console.log(newPage.url());
 
@@ -245,9 +271,7 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
                         }
                     }
                 }
-
                 await newPage.close();
-
 
             }
         } catch (err) {

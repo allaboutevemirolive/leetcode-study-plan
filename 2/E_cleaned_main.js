@@ -10,60 +10,14 @@ async function languageFiller(page, search_lang) {
     await page.waitForTimeout(5000);
 }
 
-
-async function accessQuestionLink(page) {
-    // const targetUrl = match + "solutions/?orderBy=newest_to_oldest";
-
-
-    const url = new URL(page);
-    const pathSegments = url.pathname.split('/');
-
-    // Find the index of the "description" path segment
-    const descriptionIndex = pathSegments.findIndex(segment => segment === 'description');
-
-    if (descriptionIndex !== -1) {
-        // Replace the "description" segment with "solutions"
-        pathSegments[descriptionIndex] = 'solutions';
-
-        // Update the URL pathname with the modified path segments
-        url.pathname = pathSegments.join('/');
-
-        const targetUrl = url.origin + url.pathname;
-        console.log(targetUrl);
-    } else {
-        console.log("Invalid URL format. Unable to convert.");
-    }
-
-
-    await page.goto(targetUrl);
-    await page.waitForTimeout(3000);
-}
-
-
-// Need to refactor this function
-async function folderPageNotFound(folder_page_not_found) {
-    console.log('No links found');
-
-    const folderPath = `${__dirname}/${folder_page_not_found}`;
-    const filePath = `${folderPath}/emptyFile.txt`;
-
-    try {
-        // Create the folder if it doesn't exist
-        fs.mkdirSync(folderPath, { recursive: true });
-
-        // Write to the file
-        fs.writeFileSync(filePath, `// nothing`);
-
-        console.log(`File 'emptyFile' saved inside ${folder_page_not_found} folder.`);
-    } catch (err) {
-        console.error(`Error writing to file: ${err}`);
-    }
-}
-
-
 async function sortButtonClicker(page) {
     const button_sort = await page.$('#headlessui-menu-button-\\:Rmaa9j9l5t6\\:');
     await button_sort.click();
+}
+
+async function listOption(page) {
+    const button_option = await page.$('button[id="headlessui-menu-button-:Rb5ai9j9d5t6:"]');
+    await button_option.click();
 }
 
 
@@ -71,6 +25,7 @@ async function recentButtonClicker(page) {
     const button_recent = await page.$('div.truncate:has-text("Most Recent")');
     await button_recent.click();
 }
+
 
 async function scrapEachSolutionLink(page) {
 
@@ -144,10 +99,6 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
     }
 }
 
-
-
-
-
 (async () => {
     const browser = await chromium.launch({ headless: false });
 
@@ -186,20 +137,12 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 
         await newPage.waitForLoadState('networkidle');
 
-        // Code you need to implement
         const solutionElement = await newPage.waitForSelector('span:has-text("Solutions")');
-        // const solutionText = await solutionElement.textContent();
 
         await solutionElement.click();
 
-        // Implement language filler
 
         const folder_dash = `${textContent}`;
-
-
-        // const url = new URL(newPage.url());
-        // url.pathname = url.pathname.replace('/description/', '/solutions/');
-        // const code2 = url.toString();
 
         console.log(newPage.url());
 
@@ -216,61 +159,40 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 
         await newPage.goto(code2);
 
-        // try {
-        //     const url = new URL(newPage.url());
-        //     const pathSegments = url.pathname.split('/');
-
-        //     // Find the index of the "description" path segment
-        //     const descriptionIndex = pathSegments.findIndex(segment => segment === 'description');
-
-        //     if (descriptionIndex !== -1) {
-        //         // Replace the "description" segment with "solutions"
-        //         pathSegments[descriptionIndex] = 'solutions';
-
-        //         // Update the URL pathname with the modified path segments
-        //         url.pathname = pathSegments.join('/');
-
-        //         const targetUrl = url.origin + url.pathname;
-
-        //         await newPage.goto(targetUrl);
-
-
-        //         console.log(targetUrl);
-        //     } else {
-        //         console.log("Invalid URL format. Unable to convert.");
-        //     }
-        // } catch (err) {
-        //     console.log('Page not found. Not premium user or there is no solution');
-        // }
-
         try {
-            // await accessQuestionLink(newPage);
             await languageFiller(newPage, search_lang);
         } catch (err) {
             console.log('Page not found. Not premium user or there is no solution');
-            // await folderPageNotFound(folder_page_not_found);
 
             console.log('langugage filler error');
             await new Promise(() => { });
-            // continue;
         }
 
         try {
             await sortButtonClicker(newPage);
-            await recentButtonClicker(newPage);
         } catch (err) {
             console.log('No sort button');
         }
 
+
+        try {
+            await listOption(newPage);
+        } catch (err) {
+            console.log('No list option');
+        }
+
+
+        try {
+            await recentButtonClicker(newPage)
+        } catch (err) {
+            console.log('No recent button');
+        }
+
         const links = await scrapEachSolutionLink(newPage);
 
-        // links for the solution
         if (links.length === 0) {
-            // If page not found, create an empty folder with " _EMPTY_ " prefix
-            // await folderPageNotFound(folder_page_not_found);
             console.log('No links found');
         } else {
-            // For each solution/link, we store it in a txt file
             for (const link of links) {
                 try {
                     const file_txt_underscore = await constructSolutionFile(newPage, link);
@@ -286,11 +208,6 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
                 }
             }
         }
-
-
-        // console.log(solutionText);
-
-        // await new Promise(() => { });
 
         await newPage.close();
     }

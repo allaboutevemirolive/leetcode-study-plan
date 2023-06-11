@@ -12,17 +12,20 @@ async function languageFiller(page, search_lang) {
 async function sortButtonClicker(page) {
     const button_sort = await page.$('#headlessui-menu-button-\\:Rmaa9j9l5t6\\:');
     await button_sort.click();
+    await page.waitForTimeout( 2 * 1000 );
 }
 
 async function listOption(page) {
     const button_option = await page.$('button[id="headlessui-menu-button-:Rb5ai9j9d5t6:"]');
     await button_option.click();
+    await page.waitForTimeout( 2 * 1000 );
 }
 
 
 async function recentButtonClicker(page) {
     const button_recent = await page.$('div.truncate:has-text("Most Recent")');
     await button_recent.click();
+    await page.waitForTimeout( 2 * 1000 );
 }
 
 
@@ -80,19 +83,17 @@ async function copySolutionToClipboard(page, target_language_class) {
 }
 
 
-async function writeToFile(folder_dash, link, copied_solution, file_txt_underscore, filePath) {
-    // const folderPath = `${__dirname}/${folder_dash}`;
-    // const filePath = `${folderPath}/${file_txt_underscore}.rs`;
-
-    // const folderPath = `${__dirname}/${folderPath}/${folder_dash}`;
-    const filePath2 = `${filePath}/${file_txt_underscore}.rs`;
+// Need to refactor this function
+async function writeToFile(folder_dash, link, copied_solution, file_txt_underscore) {
+    const folderPath = `${__dirname}/${folder_dash}`;
+    const filePath = `${folderPath}/${file_txt_underscore}.rs`;
 
     try {
         // Create the folder if it doesn't exist
-        // fs.mkdirSync(filePath2, { recursive: true });
+        fs.mkdirSync(folderPath, { recursive: true });
 
         // Write to the file
-        fs.writeFileSync(filePath2, `// ${link}\n${copied_solution}`);
+        fs.writeFileSync(filePath, `// ${link}\n${copied_solution}`);
 
         console.log(`File ${file_txt_underscore} saved inside ${folder_dash} folder.`);
     } catch (err) {
@@ -101,13 +102,14 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 }
 
 
-
+// async function detectFoldersAndCreateFiles(page, context, search_lang, unhide_Lang_Button, target_language_class) {
+    
+// }
 
 (async () => {
     const browser = await chromium.launch({ headless: false });
     const context = await browser.newContext();
     const page = await context.newPage();
-
 
     const search_lang = "rust";
 
@@ -115,45 +117,39 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 
     const target_language_class = '.language-rust, .language-python, .language-java, .language-cpp';
 
-
     const targetLink = 'https://leetcode.com/studyplan/top-interview-150/';
     await page.goto(targetLink);
 
     await page.waitForSelector('div.w-full.overflow-hidden.css-yw0m6t');
 
-    // await detectFoldersAndCreateFiles(page);
+    // await detectFoldersAndCreateFiles(page, context, search_lang, unhide_Lang_Button, target_language_class);
+
 
     const folderElements = await page.$$('div.w-full.overflow-hidden.css-yw0m6t');
 
     for (const folderElement of folderElements) {
-
         const folderNameElement = await folderElement.$('div[style="font-size: 12px; font-weight: 500;"]');
-
         const folderName = await folderNameElement.textContent();
         const folderPath = `${__dirname}/${folderName}`;
 
         try {
-
             fs.mkdirSync(folderPath, { recursive: true });
-
             console.log(`Created folder: ${folderName}`);
+
+            // We can specify the element we want by using await folderElement.$$. So we can get the elements inside folderElement attribute.
+            // Normally we would use await page.$$ which indicates the whole page.
 
             const fileElements = await folderElement.$$('div[style="font-weight: 500; font-size: 14px;"]');
 
+            // for (const fileElement of fileElements) {
+            //     const fileName = await fileElement.textContent();
+            //     const filePath = `${folderPath}/${fileName}.txt`;
+
+            //     fs.writeFileSync(filePath, '');
+            //     console.log(`Created file: ${filePath}`);
+            // }
+
             for (const element of fileElements) {
-                const fileName = await element.textContent();
-
-                // Update file path
-                const filePath = `${folderPath}/${fileName}`;
-
-                // fs.writeFileSync(filePath, '');
-                fs.mkdirSync(filePath, { recursive: true });
-
-                console.log(`Created file: ${filePath}`);
-
-
-                // code
-
                 await element.click();
 
                 await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
@@ -176,10 +172,7 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 
                 await solutionElement.click();
 
-
                 const folder_dash = `${textContent}`;
-
-                // const folder_dash = `${folderPath}/${folder_name}`;
 
                 console.log(newPage.url());
 
@@ -237,7 +230,7 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
                             await clickLangButton(newPage, unhide_Lang_Button);
 
                             const copied_solution = await copySolutionToClipboard(newPage, target_language_class);
-                            await writeToFile(folder_dash, link, copied_solution, file_txt_underscore, filePath);
+                            await writeToFile(folder_dash, link, copied_solution, file_txt_underscore);
 
                         } catch (error) {
                             console.log(`Error occurred while processing link: ${link}`);
@@ -247,13 +240,15 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
                 }
 
                 await newPage.close();
-
-
             }
+
+
         } catch (err) {
             console.error(`Error creating folder or file: ${err}`);
         }
     }
+
+
 
     await browser.close();
 })();

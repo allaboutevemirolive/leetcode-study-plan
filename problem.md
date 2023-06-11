@@ -1,83 +1,24 @@
-const { chromium } = require('playwright');
-const fs = require('fs');
+Forget about the other absence function. I have why the file created in writeToFile function did not place inside "fs.mkdirSync(folderPath, { recursive: true });" ? Instead the writeToFile function just create the file as same path as  "fs.mkdirSync(folderPath, { recursive: true });"
 
 
-async function languageFiller(page, search_lang) {
-    const searchInput = await page.$('input[type="text"][placeholder="Search..."]');
-    await page.waitForTimeout(3000);
-    await searchInput.fill(search_lang);
-    await page.waitForTimeout(5000);
-}
+Error :
 
-async function sortButtonClicker(page) {
-    const button_sort = await page.$('#headlessui-menu-button-\\:Rmaa9j9l5t6\\:');
-    await button_sort.click();
-}
-
-async function listOption(page) {
-    const button_option = await page.$('button[id="headlessui-menu-button-:Rb5ai9j9d5t6:"]');
-    await button_option.click();
-}
+nemesis@nemesis:~/Documents/Github/my_repo/leetcode-study-plan$ node A_bulk.js
+Created folder: Array / String
+Created file: /home/nemesis/Documents/Github/my_repo/leetcode-study-plan/Array / String/Merge Sorted Array
+88. Merge Sorted Array
+https://leetcode.com/problems/merge-sorted-array/solutions/?envType=study-plan-v2&envId=top-interview-150
+https://leetcode.com/problems/merge-sorted-array/solutions
+No sort button
+Scraped 15 links
+Rust button is visible or there is only one language
+Error writing to file: Error: EISDIR: illegal operation on a directory, open '/home/nemesis/Documents/Github/my_repo/leetcode-study-plan/Array / String/Merge Sorted Array/merge_sorted_array1636648.rs'
 
 
-async function recentButtonClicker(page) {
-    const button_recent = await page.$('div.truncate:has-text("Most Recent")');
-    await button_recent.click();
-}
 
 
-async function scrapEachSolutionLink(page) {
 
-    const links = await page.$$eval('a[href*="/problems/"]', links =>
-        links.filter(link => {
-            const row = link.closest('div[class="hover:bg-fill-4 dark:hover:bg-dark-fill-4 relative flex w-full cursor-pointer gap-4 px-4 py-4"]');
-            return row && row.querySelector('a[href*="/problems/"]') === link;
-        })
-            .map(link => link.href)
-    );
-
-    console.log(`Scraped ${links.length} links`);
-
-    return links;
-}
-
-// Need to refactor this function
-async function constructSolutionFile(page, link) {
-
-    await page.goto(link);
-    await page.waitForTimeout(3000);
-
-    const pathSegments = link.split('/').filter(str => str !== "");
-    // We need to change "-" to "_" to follow the naming convention
-    const problemName = pathSegments[pathSegments.indexOf("problems") + 1];
-    const updatedProblemName = problemName.replace(/-/g, '_');
-
-    const solutionId = pathSegments[pathSegments.indexOf("solutions") + 1];
-    const file_txt_underscore = `${updatedProblemName}${solutionId}`;
-
-    return file_txt_underscore;
-}
-
-
-async function clickLangButton(page, unhide_Lang_Button) {
-    const targetLanguageButton = await page.$(`div.relative.cursor-pointer.px-3.py-3.text-label-4.dark\\:text-dark-label-4.hover\\:text-label-1.dark\\:hover\\:text-dark-label-1.GMIHh:has-text("${unhide_Lang_Button}")`);
-
-    if (targetLanguageButton) {
-        await targetLanguageButton.click();
-        console.log('Clicked Rust hidden button / there is more than one language');
-    } else {
-        console.log('Rust button is visible or there is only one language');
-    }
-}
-
-
-async function copySolutionToClipboard(page, target_language_class) {
-    const dataElement = await page.waitForSelector(target_language_class);
-    await page.waitForTimeout(3000);
-    const copied_solution = await dataElement.innerText();
-    await page.waitForTimeout(3000);
-    return copied_solution;
-}
+code :
 
 
 async function writeToFile(folder_dash, link, copied_solution, file_txt_underscore, filePath) {
@@ -89,7 +30,7 @@ async function writeToFile(folder_dash, link, copied_solution, file_txt_undersco
 
     try {
         // Create the folder if it doesn't exist
-        // fs.mkdirSync(filePath2, { recursive: true });
+        fs.mkdirSync(filePath2, { recursive: true });
 
         // Write to the file
         fs.writeFileSync(filePath2, `// ${link}\n${copied_solution}`);
